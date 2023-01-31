@@ -1,7 +1,14 @@
 import math
 
-from Graph_f import Graph
-from classe import SinWave, SquareWave, SawTeethWave, TriangleWave, GaussianWave, ImpulseWave
+from commun.Graph_f import Graph
+from commun.classe import (
+    SinWave,
+    SquareWave,
+    SawTeethWave,
+    TriangleWave,
+    GaussianWave,
+    ImpulseWave,
+)
 
 if __name__ == "__main__":
     # Sinusoidal wave
@@ -18,7 +25,7 @@ if __name__ == "__main__":
         xlabel="t",
         ylabel="Amplitude",
     )
-    # graph.plot()
+    graph.plot()
 
     # todo2
 
@@ -43,7 +50,7 @@ if __name__ == "__main__":
         xlabel="t",
         ylabel="Amplitude",
     )
-    # graph.plot()
+    graph.plot()
 
     # todo3 signal carré
 
@@ -61,7 +68,7 @@ if __name__ == "__main__":
         xlabel="t",
         ylabel="Amplitude",
     )
-    # graph.plot()
+    graph.plot()
 
     # todo3.2 signal saw teeth
 
@@ -79,7 +86,7 @@ if __name__ == "__main__":
         xlabel="t",
         ylabel="Amplitude",
     )
-    # graph.plot()
+    graph.plot()
 
     # todo3.3 signal triangle
 
@@ -114,7 +121,9 @@ if __name__ == "__main__":
 
     mean = 0
     std = 0.2
-    gaussian_wave = GaussianWave(mean=mean, std=std, fe=1000, d=0.08, title="Gaussian noise", format="-g.")
+    gaussian_wave = GaussianWave(
+        mean=mean, std=std, fe=1000, d=0.08, title="Gaussian noise", format="-g."
+    )
     gaussian_wave.make_wave()
 
     mean = 0
@@ -122,7 +131,16 @@ if __name__ == "__main__":
     nbi = 2
     di = 2
 
-    impluse = ImpulseWave(mean=mean, std=std, fe=1000, d=0.08, title="Impulse noise", nbi=nbi, di=di, format="-g.")
+    impluse = ImpulseWave(
+        mean=mean,
+        std=std,
+        fe=1000,
+        d=0.08,
+        title="Impulse noise",
+        nbi=nbi,
+        di=di,
+        format="-g.",
+    )
     impluse.make_wave()
 
     sin_wave_sum = sin_wave + gaussian_wave + impluse
@@ -130,6 +148,37 @@ if __name__ == "__main__":
     l_wave = [sin_wave, gaussian_wave, impluse, sin_wave_sum]
     graph = Graph(
         l_wave,
+        plot_type="line",
+        subplot=True,
+        title="SinWave with noise",
+        xlabel="t",
+        ylabel="Amplitude",
+    )
+    graph.plot()
+
+    # convert to a wav file
+    a = 0.2
+    f = 440.0
+    fe = 44100.0
+    ph = 0
+    d = 5
+    sin_wave = SinWave(a=0.2, f=440.0, fe=44100.0, ph=0, d=5)
+    sin_wave.make_wave()
+
+    bruit_gaussien = GaussianWave(mean=0, std=0.05, a=a, f=f, fe=fe, ph=ph, d=d)
+    bruit_gaussien.make_wave()
+
+    bruit_impulsif = ImpulseWave(
+        mean=0, std=1.6, nbi=2, di=1000, a=a, f=f, fe=fe, ph=ph, d=d
+    )
+    bruit_impulsif.make_wave()
+
+    son = sin_wave + bruit_gaussien + bruit_impulsif
+
+    son.convert_to_wav()
+
+    graph = Graph(
+        [sin_wave, bruit_gaussien, bruit_impulsif, son],
         plot_type="line",
         subplot=True,
         title="SinWave with noise",

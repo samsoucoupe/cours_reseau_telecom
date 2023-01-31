@@ -1,3 +1,5 @@
+import wave as wv
+
 import numpy as np
 
 
@@ -7,15 +9,15 @@ class Wave:
     """
 
     def __init__(
-            self,
-            a=1.0,
-            f=440.0,
-            fe=8000.0,
-            ph=0.0,
-            d=1.0,
-            title="Une wave",
-            label="Wave :",
-            format="-bo",
+        self,
+        a=1.0,
+        f=440.0,
+        fe=8000.0,
+        ph=0.0,
+        d=1.0,
+        title="Une wave",
+        label="Wave :",
+        format="-bo",
     ):
         self.sig_s = None
         self.sig_t = None
@@ -61,9 +63,7 @@ class Wave:
         other.make_wave()
 
         if len(self.sig_t) != len(other.sig_t):
-            raise Exception(
-                "Les deux signaux doivent avoir la meme duree"
-            )
+            raise Exception("Les deux signaux doivent avoir la meme duree")
 
         new_signal.sig_t = self.sig_t
         sig_s = np.add(self.sig_s, other.sig_s)
@@ -73,6 +73,15 @@ class Wave:
         new_signal.sig_s = sig_s
 
         return new_signal
+
+    def convert_to_wav(self):
+        """
+        Convert the signal to a wav file
+        """
+        wav = wv.open("test.wav", "w")
+        wav.setparams((1, 2, self.fe, 0, "NONE", "not compressed"))
+        wav.writeframes(self.sig_s)
+        wav.close()
 
 
 class SinWave(Wave):
@@ -118,8 +127,8 @@ class TriangleWave(Wave):
 
     def wave_type(self, a, omega, t, ph):
         return a * (
-                (4 * abs((t + ph) / (1 / self.f) - np.floor(t / (1 / self.f) + 1 / 2)))
-                - 1.0
+            (4 * abs((t + ph) / (1 / self.f) - np.floor(t / (1 / self.f) + 1 / 2)))
+            - 1.0
         )
 
 
@@ -183,7 +192,7 @@ class ImpulseWave(Wave):
             width = self.di
             length = np.random.normal(self.mean, self.std)
             pos = np.random.randint(0, N)
-            sig_s[pos:pos + width] = length
+            sig_s[pos : pos + width] = length
 
         self.sig_t = t
         self.sig_s = sig_s

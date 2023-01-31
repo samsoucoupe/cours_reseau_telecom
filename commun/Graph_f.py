@@ -2,8 +2,15 @@ import matplotlib.pyplot as plt
 
 
 class Graph:
-
-    def __init__(self, waves, plot_type="line", subplot=False, title="Graph", xlabel="t", ylabel="A"):
+    def __init__(
+        self,
+        waves,
+        plot_type="line",
+        subplot=False,
+        title="Graph",
+        xlabel="t",
+        ylabel="A",
+    ):
         self.waves = waves
         self.plot_type = plot_type
         self.subplot = subplot
@@ -25,7 +32,9 @@ class Graph:
             ax.grid(True)
             plt.show()
         else:
-            fig, ax = plt.subplots(len(self.waves), 1, sharex=True, sharey=True, figsize=(10, 10), dpi=100)
+            fig, ax = plt.subplots(
+                len(self.waves), 1, sharex=True, sharey=True, figsize=(10, 10), dpi=100
+            )
             for i, wave in enumerate(self.waves):
                 ax[i].set_title(wave.title)
                 ax[i].set_xlabel(self.xlabel)
@@ -34,5 +43,9 @@ class Graph:
                     wave.plot_on_ax(ax[i])
                 elif self.plot_type == "scatter":
                     wave.scatter_on_ax(ax[i])
+
+                ax[i].grid(True)
+
             plt.tight_layout()
+
             plt.show()
