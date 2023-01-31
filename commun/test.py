@@ -5,17 +5,6 @@ import numpy as np
 from Graph_f import Graph
 
 
-def an(n, A):
-    if n % 2 == 0:
-        return 0
-    else:
-        return (8 * A) / (np.pi ** 2) * (1 / (n ** 2))
-
-
-def bn(n, A):
-    return 0
-
-
 class Signal:
     def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
         self.sig_s = None
@@ -48,9 +37,9 @@ class Signal:
             self.sig_t[i] = t
             n = 0  # calcul de la valeur du sample
             while n < self.nmax:  # pour chaque harmonique ... on ajoute sa contribution
-                self.sig_s[i] += self.an(n, self.A) * math.cos(2 * math.pi * n * self.Fo * t) + self.bn(n,
-                                                                                                        self.A) * math.sin(
-                    2 * math.pi * n * self.Fo * t)
+                self.sig_s[i] += self.an(n, self.A) * math.cos(
+                    2 * math.pi * n * self.Fo * t
+                ) + self.bn(n, self.A) * math.sin(2 * math.pi * n * self.Fo * t)
 
     def plot_on_ax(self, ax):
         ax.plot(self.sig_t, self.sig_s, self.format, label=self.label)
@@ -71,7 +60,7 @@ class Signal:
         return new_signal
 
 
-class Signal_T(Signal):
+class SignalT(Signal):
     def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
         super().__init__(A, f, Fo, fe, nmax, d, title, label, format)
 
@@ -79,7 +68,7 @@ class Signal_T(Signal):
         if n % 2 == 0:
             return 0
         else:
-            return (8 * A) / (np.pi ** 2) * (1 / (n ** 2))
+            return (8 * A) / (np.pi**2) * (1 / (n**2))
 
     def bn(self, n, A):
         return 0
@@ -90,17 +79,19 @@ f = 750
 Fo = f
 fe = 8000
 nmax = 32
-d = 3 * 1 / f
+d = 3 * (1 / f)
 title = "Une wave"
 label = "Wave :"
 format = "-bo"
 
-signal = Signal(A=A, f=f, Fo=Fo, fe=fe, nmax=nmax, d=d, title=title, label=label, format=format)
+signal = Signal(
+    A=A, f=f, Fo=Fo, fe=fe, nmax=nmax, d=d, title=title, label=label, format=format
+)
 signal.make_signal()
 
 graph = Graph(
     [signal],
-    plot_type="plot",
+    plot_type="line",
     subplot=True,
     title="SinWave with noise",
     xlabel="t",
