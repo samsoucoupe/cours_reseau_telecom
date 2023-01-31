@@ -9,7 +9,7 @@ if __name__ == '__main__':
     sin_wave.make_wave()
 
     graph = Graph(waves=[sin_wave], plot_type="line", subplot=False, title="SinWave", xlabel="t", ylabel="Amplitude")
-    graph.plot()
+    # graph.plot()
 
     # todo2
 
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     sin_waves = [sin_wave1, sin_wave2]
 
     graph = Graph(waves=sin_waves, plot_type="line", subplot=False, title="SinWaves", xlabel="t", ylabel="Amplitude")
-    graph.plot()
+    # graph.plot()
 
     # todo3 signal carré
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     graph = Graph(waves=[sin_square1], plot_type="line", subplot=False, title="SquareWave", xlabel="t",
                   ylabel="Amplitude")
-    graph.plot()
+    # graph.plot()
 
     # todo3.2 signal saw teeth
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     graph = Graph(waves=[sin_saw_teeth], plot_type="line", subplot=False, title="SawTeethWave", xlabel="t",
                   ylabel="Amplitude")
-    graph.plot()
+    # graph.plot()
 
     # todo3.3 signal triangle
 
@@ -53,4 +53,28 @@ if __name__ == '__main__':
 
     graph = Graph(waves=[sin_triangle], plot_type="line", subplot=False, title="TriangleWave", xlabel="t",
                   ylabel="Amplitude")
-    graph.plot()
+    # graph.plot()
+
+    # sin wave with noise
+    if False:
+        sin_wave = SinWave(a=2, f=50, fe=1000, ph=0, d=0.08, title="Une sinusoide", format="-bo")
+        sin_wave_gauss = SinWave(a=2, f=50, fe=1000, ph=0, d=0.08, title="Une sinusoide", format="-g.")
+        sin_wave_impulse = SinWave(a=2, f=50, fe=1000, ph=0, d=0.08, title="Une sinusoide", format="-g.")
+        sin_wave_sum = SinWave(a=2, f=50, fe=1000, ph=0, d=0.08, title="Une sinusoide", format="-r.")
+
+        sin_wave.make_wave()
+        sin_wave_gauss.make_wave()
+        sin_wave_impulse.make_wave()
+        sin_wave_sum.make_wave()
+        noise_gauss = sin_wave_gauss.generate_gaussian_noise(0.5, 0.1)
+        noise_impulse = sin_wave_impulse.generate_impulse_noise(0.5, 0.1)
+        sin_wave_gauss.add_noise(noise_gauss)
+        sin_wave_impulse.add_noise(noise_impulse)
+        sin_wave_sum.add_signal(sin_wave_gauss)
+        sin_wave_sum.add_signal(sin_wave_impulse)
+
+        graph = Graph(waves=[sin_wave, sin_wave_gauss, sin_wave_impulse, sin_wave_sum], plot_type="line", subplot=True,
+                      title="SinWave", xlabel="t", ylabel="Amplitude")
+        graph.plot()
+
+

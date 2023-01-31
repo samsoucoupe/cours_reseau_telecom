@@ -36,6 +36,18 @@ class Wave:
     def scatter_on_ax(self, ax):
         ax.scatter(self.sig_t, self.sig_s, label=self.label)
 
+    def generate_gaussian_noise(self, mean, std):
+        return np.random.normal(mean, std, len(self.sig_s))
+
+    def generate_impulse_noise(self, mean, std):
+        return np.random.normal(mean, std, len(self.sig_s))
+
+    def add_noise(self, noisy_signal):
+        self.sig_s = self.sig_s + noisy_signal
+
+    def add_signal(self, signal):
+        self.sig_s = self.sig_s + signal.sig_s
+
 
 class SinWave(Wave):
     """
