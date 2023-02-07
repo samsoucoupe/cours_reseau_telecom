@@ -10,15 +10,15 @@ class Wave:
     """
 
     def __init__(
-        self,
-        a=1.0,
-        f=440.0,
-        fe=8000.0,
-        ph=0.0,
-        d=1.0,
-        title="Une wave",
-        label="Wave :",
-        format="-bo",
+            self,
+            a=1.0,
+            f=440.0,
+            fe=8000.0,
+            ph=0.0,
+            d=1.0,
+            title="Une wave",
+            label="Wave :",
+            format="-bo",
     ):
         self.sig_s = None
         self.sig_t = None
@@ -128,8 +128,8 @@ class TriangleWave(Wave):
 
     def wave_type(self, a, omega, t, ph):
         return a * (
-            (4 * abs((t + ph) / (1 / self.f) - np.floor(t / (1 / self.f) + 1 / 2)))
-            - 1.0
+                (4 * abs((t + ph) / (1 / self.f) - np.floor(t / (1 / self.f) + 1 / 2)))
+                - 1.0
         )
 
 
@@ -193,7 +193,7 @@ class ImpulseWave(Wave):
             width = self.di
             length = np.random.normal(self.mean, self.std)
             pos = np.random.randint(0, N)
-            sig_s[pos : pos + width] = length
+            sig_s[pos: pos + width] = length
 
         self.sig_t = t
         self.sig_s = sig_s
@@ -234,6 +234,7 @@ class Signal:
                 self.sig_s[i] += self.an(n, self.A) * math.cos(
                     2 * math.pi * n * self.Fo * t
                 ) + self.bn(n, self.A) * math.sin(2 * math.pi * n * self.Fo * t)
+                n += 1
 
     def plot_on_ax(self, ax):
         ax.plot(self.sig_t, self.sig_s, self.format, label=self.label)
@@ -244,6 +245,48 @@ class Signal:
     def change_format(self, format):
         self.format = format
 
+    def change_label(self, label):
+        self.label = label
+
+    def change_title(self, title):
+        self.title = title
+
+    def get_an(self):
+        new_signal = Signal(
+            self.A, self.f, self.Fo, self.fe, self.nmax, self.d, "", "", ""
+        )
+        # it's a signal but with only an values
+        new_signal.sig_s = np.zeros(self.nmax)
+        new_signal.sig_t = np.zeros(self.nmax)
+        new_signal.te = 1.0 / self.fe
+        new_signal.title = "an values"
+        new_signal.format = "g."
+        new_signal.label = "an values"
+
+        for i in range(self.nmax):
+            new_signal.sig_s[i] = self.an(i, self.A)
+            new_signal.sig_t[i] = i
+
+        return new_signal
+
+    def get_bn(self):
+        new_signal = Signal(
+            self.A, self.f, self.Fo, self.fe, self.nmax, self.d, "", "", ""
+        )
+        # it's a signal but with only bn values
+        new_signal.sig_s = np.zeros(self.nmax)
+        new_signal.sig_t = np.zeros(self.nmax)
+        new_signal.te = 1.0 / self.fe
+        new_signal.title = "bn values"
+        new_signal.format = "g."
+        new_signal.label = "bn values"
+
+        for i in range(self.nmax):
+            new_signal.sig_s[i] = self.bn(i, self.A)
+            new_signal.sig_t[i] = i
+
+        return new_signal
+
 
 class SignalT(Signal):
     def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
@@ -253,7 +296,33 @@ class SignalT(Signal):
         if n % 2 == 0:
             return 0
         else:
-            return (8 * A) / (np.pi**2) * (1 / (n**2))
+            return (8 * A) / (np.pi ** 2) * (1 / (n ** 2))
 
     def bn(self, n, A):
         return 0
+
+
+class SignalR(Signal):
+    def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
+        super().__init__(A, f, Fo, fe, nmax, d, title, label, format)
+
+    def an(self, n, A):
+        return 0
+
+    def bn(self, n, A):
+        if n == 0:
+            return 0
+        return (-2 * A) / np.pi * (1 / n)
+
+
+class SignalC(Signal):
+    def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
+        super().__init__(A, f, Fo, fe, nmax, d, title, label, format)
+
+    def an(self, n, A):
+        return 0
+
+    def bn(self, n, A):
+        if n % 2 == 0:
+            return 0
+        return 4 * A / (np.pi * n)

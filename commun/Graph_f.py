@@ -32,9 +32,7 @@ class Graph:
             ax.grid(True)
             plt.show()
         else:
-            fig, ax = plt.subplots(
-                len(self.waves), 1, sharex=True, sharey=True, figsize=(10, 10), dpi=100
-            )
+            fig, ax = plt.subplots(len(self.waves), 1, dpi=100)
             for i, wave in enumerate(self.waves):
                 ax[i].set_title(wave.title)
                 ax[i].set_xlabel(self.xlabel)
