@@ -7,8 +7,7 @@ from Graph_f import Graph
 
 class Signal:
     def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
-        self.sig_s = None
-        self.sig_t = None
+
         self.A = A
         self.f = f
         self.fe = fe
@@ -16,7 +15,8 @@ class Signal:
         self.nmax = nmax
         self.d = d
         self.N = int(self.d * self.fe)
-
+        self.sig_s = np.zeros(self.N)
+        self.sig_t = np.zeros(self.N)
         self.title = title
         self.format = format
         self.label = label
@@ -28,8 +28,7 @@ class Signal:
         return 1
 
     def make_signal(self):
-        self.sig_s = np.zeros(self.N)
-        self.sig_t = np.zeros(self.N)
+
         self.te = 1.0 / self.fe
 
         for i in range(self.N):
@@ -40,6 +39,7 @@ class Signal:
                 self.sig_s[i] += self.an(n, self.A) * math.cos(
                     2 * math.pi * n * self.Fo * t
                 ) + self.bn(n, self.A) * math.sin(2 * math.pi * n * self.Fo * t)
+                n += 1
 
     def plot_on_ax(self, ax):
         ax.plot(self.sig_t, self.sig_s, self.format, label=self.label)
@@ -68,13 +68,13 @@ class SignalT(Signal):
         if n % 2 == 0:
             return 0
         else:
-            return (8 * A) / (np.pi**2) * (1 / (n**2))
+            return (8 * A) / (np.pi ** 2) * (1 / (n ** 2))
 
     def bn(self, n, A):
         return 0
 
 
-A = 1
+A = 1.5
 f = 750
 Fo = f
 fe = 8000
@@ -84,7 +84,7 @@ title = "Une wave"
 label = "Wave :"
 format = "-bo"
 
-signal = Signal(
+signal = SignalT(
     A=A, f=f, Fo=Fo, fe=fe, nmax=nmax, d=d, title=title, label=label, format=format
 )
 signal.make_signal()
@@ -92,7 +92,6 @@ signal.make_signal()
 graph = Graph(
     [signal],
     plot_type="line",
-    subplot=True,
     title="SinWave with noise",
     xlabel="t",
     ylabel="Amplitude",

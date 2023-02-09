@@ -20,8 +20,7 @@ class Wave:
             label="Wave :",
             format="-bo",
     ):
-        self.sig_s = None
-        self.sig_t = None
+        self.sig_s = np.linspace(0, d, int(d * fe))
         self.a = a
         self.f = f
         self.fe = fe
@@ -30,6 +29,7 @@ class Wave:
         self.title = title
         self.format = format
         self.label = label
+        self.sig_t = np.linspace(0, self.d, int(self.d * self.fe))
 
     def make_wave(self):
         omega = 2 * np.pi * self.f
@@ -199,6 +199,46 @@ class ImpulseWave(Wave):
         self.sig_s = sig_s
 
 
+class CosWave(Wave):
+    """
+    Class for cosine wave
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.label = "Cos Wave : a={}, f={}, fe={}, ph={}, d={}".format(
+            self.a, self.f, self.fe, self.ph, self.d
+        )
+
+    def wave_type(self, a, omega, t, ph):
+        return a * np.cos(omega * t + ph)
+
+
+class Convultion(Wave):
+    def __init__(self, sig, h):
+        super().__init__(sig.a, sig.f, sig.fe, sig.ph, sig.d)
+        self.sig = sig
+        self.h = h
+
+    def make_wave(self):
+        if self.sig_t is not None and self.sig_s is not None:
+            return self.sig_t, self.sig_s
+
+        self.sig_t, self.sig_s = self.sig.calculate()
+        new_sig_s = np.zeros(len(self.sig_s))
+
+        for i in range(len(self.sig_t)):
+            for k in range(len(self.h)):
+                if i - k < 0:
+                    break
+                print(i, k)
+                new_sig_s[i] += self.h[k] * self.sig_s[i - k]
+
+        self.sig_s = new_sig_s
+
+        return self.sig_t, self.sig_s
+
+
 class Signal:
     def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
         self.sig_s = None
@@ -326,3 +366,109 @@ class SignalC(Signal):
         if n % 2 == 0:
             return 0
         return 4 * A / (np.pi * n)
+
+
+class SignalFourrier(Wave):
+    def __init__(self, a, f, Fo, fe, d, title, label, format, nmax, an, bn):
+        super().__init__(a, f, Fo, fe, d, title, label, format)
+        self.fe = fe
+        self.an = an
+        self.bn = bn
+        self.nmax = nmax
+        self.N = int(self.d * self.fe)
+        self.Fo = Fo
+        self.sig_s = np.zeros(self.N)
+        self.sig_t = np.zeros(self.N)
+
+    def make_wave(self):
+
+        self.te = 1.0 / self.fe
+
+        for i in range(self.N):
+            t = i * self.te  # instant correspondant
+            self.sig_t[i] = t
+            n = 0  # calcul de la valeur du sample
+            while n < self.nmax:  # pour chaque harmonique ... on ajoute sa contribution
+                self.sig_s[i] += self.an(n, self.a) * math.cos(
+                    2 * math.pi * n * self.Fo * t
+                ) + self.bn(n, self.a) * math.sin(2 * math.pi * n * self.Fo * t)
+                n += 1
+        print(self.sig_t, self.sig_s)
+
+    def get_an(self):
+        new_signal = SignalFourrier(
+            a=self.a,
+            f=self.f,
+            Fo=self.Fo,
+            fe=self.fe,
+            nmax=self.nmax,
+            d=self.d,
+            title="",
+            label="",
+            format="",
+            an=self.an,
+            bn=self.bn,
+        )
+        new_signal.sig_s = np.zeros(self.nmax)
+        new_signal.sig_t = np.zeros(self.nmax)
+        new_signal.te = 1.0 / self.fe
+        new_signal.title = "an values"
+        new_signal.format = "g."
+        new_signal.label = "an values"
+
+        for i in range(self.nmax):
+            new_signal.sig_s[i] = self.an(i, self.a)
+            new_signal.sig_t[i] = i
+
+        return new_signal
+
+    def get_bn(self):
+        new_signal = SignalFourrier(
+            a=self.a,
+            f=self.f,
+            Fo=self.Fo,
+            fe=self.fe,
+            nmax=self.nmax,
+            d=self.d,
+            title="",
+            label="",
+            format="",
+            an=self.an,
+            bn=self.bn,
+        )
+        new_signal.sig_s = np.zeros(self.nmax)
+        new_signal.sig_t = np.zeros(self.nmax)
+        new_signal.te = 1.0 / self.fe
+        new_signal.title = "bn values"
+        new_signal.format = "g."
+        new_signal.label = "bn values"
+
+        for i in range(self.nmax):
+            new_signal.sig_s[i] = self.bn(i, self.a)
+            new_signal.sig_t[i] = i
+
+        return new_signal
+
+
+class SignalFFT(Wave):
+    def __init__(self, signal):
+        super().__init__(signal.a, signal.f, signal.fe, signal.ph, signal.d)
+        self.signal = signal
+        self.freq = np.zeros(int(self.d * self.fe))
+
+    @staticmethod
+    def fft(sig: Signal):
+        sig_t, sig_s = sig.calculate()
+        sig_s = np.fft.fft(sig_s)
+        sig_s = np.abs(sig_s)
+        sig_s = sig_s / len(sig_s)
+        return sig_t, sig_s
+
+    def make_wave(self):
+        self.sig_t, self.sig_s = self.fft(self.signal)
+        self.t = np.fft.fftshift(self.sig_t)
+        self.sig_t = self.sig_t / len(self.sig_t)
+        self.te = 1.0 / self.fe
+        self.freq = np.fft.fftfreq(len(self.sig_t), self.te)
+
+        return self.sig_t, self.sig_s

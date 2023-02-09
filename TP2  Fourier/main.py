@@ -3,7 +3,7 @@ from commun.classe import *
 
 if __name__ == "__main__":
     # todo1
-    A = 1
+    a = 1.5
     f = 750
     Fo = f
     fe = 8000
@@ -13,57 +13,113 @@ if __name__ == "__main__":
     label = "Wave :"
     format = "-bo"
 
-    signal = SignalT(
-        A=A, f=f, Fo=Fo, fe=fe, nmax=nmax, d=d, title=title, label=label, format=format
-    )
-    signal.make_signal()
 
-    signal_an = signal.get_an()
-    signal_bn = signal.get_bn()
+    # SignalT
+    def an(n, A):
+        if n % 2 == 0:
+            return 0
+        else:
+            return (8 * A) / (np.pi ** 2) * (1 / (n ** 2))
+
+
+    def bn(n, A):
+        return 0
+
+
+    Signal = SignalFourrier(
+        a=a,
+        f=f,
+        Fo=Fo,
+        fe=fe,
+        nmax=nmax,
+        d=d,
+        title=title,
+        label=label,
+        format=format,
+        an=an,
+        bn=bn,
+    )
+    Signal.make_wave()
 
     graph = Graph(
-        [signal, signal_an, signal_bn],
+        [Signal, Signal.get_an(), Signal.get_bn()],
         plot_type="line",
         subplot=True,
-        title="signal by fourrier coefs",
-        xlabel="time",
-        ylabel="Amplitude",
+        title="SignalT",
+        xlabel="t",
     )
-
     graph.plot()
 
-    # todo3
 
-    signal = SignalR(A=A, f=f, Fo=Fo, fe=fe, nmax=nmax, d=d, title=title, label=label, format=format)
-    signal.make_signal()
+    # signalR
+    def an(n, A):
+        return 0
 
-    signal_an = signal.get_an()
-    signal_bn = signal.get_bn()
+
+    def bn(n, A):
+        if n == 0:
+            return 0
+        return (-2 * A) / np.pi * (1 / n)
+
+
+    Signal = SignalFourrier(
+        a=a,
+        f=f,
+        Fo=Fo,
+        fe=fe,
+        nmax=nmax,
+        d=d,
+        title=title,
+        label=label,
+        format=format,
+        an=an,
+        bn=bn,
+    )
+    Signal.make_wave()
 
     graph = Graph(
-        [signal, signal_an, signal_bn],
+        [Signal, Signal.get_an(), Signal.get_bn()],
         plot_type="line",
         subplot=True,
-        title="signal by fourrier coefs",
-        xlabel="time",
-        ylabel="Amplitude",
+        title="SignalR",
+        xlabel="t",
     )
-
     graph.plot()
 
-    signal = SignalC(A=A, f=f, Fo=Fo, fe=fe, nmax=nmax, d=d, title=title, label=label, format=format)
-    signal.make_signal()
 
-    signal_an = signal.get_an()
-    signal_bn = signal.get_bn()
+    # signalC
+
+    def an(n, A):
+        return 0
+
+
+    def bn(n, A):
+        if n % 2 == 0:
+            return 0
+        else:
+            return 4 * A / (np.pi * n)
+
+
+    Signal = SignalFourrier(
+        a=a,
+        f=f,
+        Fo=Fo,
+        fe=fe,
+        nmax=nmax,
+        d=d,
+        title=title,
+        label=label,
+        format=format,
+        an=an,
+        bn=bn,
+    )
+    Signal.make_wave()
 
     graph = Graph(
-        [signal, signal_an, signal_bn],
+        [Signal, Signal.get_an(), Signal.get_bn()],
         plot_type="line",
         subplot=True,
-        title="signal by fourrier coefs",
-        xlabel="time",
-        ylabel="Amplitude",
+        title="SignalC",
+        xlabel="t",
     )
-
     graph.plot()
