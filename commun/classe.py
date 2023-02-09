@@ -239,135 +239,6 @@ class Convultion(Wave):
         return self.sig_t, self.sig_s
 
 
-class Signal:
-    def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
-        self.sig_s = None
-        self.sig_t = None
-        self.A = A
-        self.f = f
-        self.fe = fe
-        self.Fo = Fo
-        self.nmax = nmax
-        self.d = d
-        self.N = int(self.d * self.fe)
-
-        self.title = title
-        self.format = format
-        self.label = label
-
-    def an(self, n, A):
-        return 1
-
-    def bn(self, n, A):
-        return 1
-
-    def make_signal(self):
-        self.sig_s = np.zeros(self.N)
-        self.sig_t = np.zeros(self.N)
-        self.te = 1.0 / self.fe
-
-        for i in range(self.N):
-            t = i * self.te  # instant correspondant
-            self.sig_t[i] = t
-            n = 0  # calcul de la valeur du sample
-            while n < self.nmax:  # pour chaque harmonique ... on ajoute sa contribution
-                self.sig_s[i] += self.an(n, self.A) * math.cos(
-                    2 * math.pi * n * self.Fo * t
-                ) + self.bn(n, self.A) * math.sin(2 * math.pi * n * self.Fo * t)
-                n += 1
-
-    def plot_on_ax(self, ax):
-        ax.plot(self.sig_t, self.sig_s, self.format, label=self.label)
-
-    def scatter_on_ax(self, ax):
-        ax.scatter(self.sig_t, self.sig_s, label=self.label)
-
-    def change_format(self, format):
-        self.format = format
-
-    def change_label(self, label):
-        self.label = label
-
-    def change_title(self, title):
-        self.title = title
-
-    def get_an(self):
-        new_signal = Signal(
-            self.A, self.f, self.Fo, self.fe, self.nmax, self.d, "", "", ""
-        )
-        # it's a signal but with only an values
-        new_signal.sig_s = np.zeros(self.nmax)
-        new_signal.sig_t = np.zeros(self.nmax)
-        new_signal.te = 1.0 / self.fe
-        new_signal.title = "an values"
-        new_signal.format = "g."
-        new_signal.label = "an values"
-
-        for i in range(self.nmax):
-            new_signal.sig_s[i] = self.an(i, self.A)
-            new_signal.sig_t[i] = i
-
-        return new_signal
-
-    def get_bn(self):
-        new_signal = Signal(
-            self.A, self.f, self.Fo, self.fe, self.nmax, self.d, "", "", ""
-        )
-        # it's a signal but with only bn values
-        new_signal.sig_s = np.zeros(self.nmax)
-        new_signal.sig_t = np.zeros(self.nmax)
-        new_signal.te = 1.0 / self.fe
-        new_signal.title = "bn values"
-        new_signal.format = "g."
-        new_signal.label = "bn values"
-
-        for i in range(self.nmax):
-            new_signal.sig_s[i] = self.bn(i, self.A)
-            new_signal.sig_t[i] = i
-
-        return new_signal
-
-
-class SignalT(Signal):
-    def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
-        super().__init__(A, f, Fo, fe, nmax, d, title, label, format)
-
-    def an(self, n, A):
-        if n % 2 == 0:
-            return 0
-        else:
-            return (8 * A) / (np.pi ** 2) * (1 / (n ** 2))
-
-    def bn(self, n, A):
-        return 0
-
-
-class SignalR(Signal):
-    def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
-        super().__init__(A, f, Fo, fe, nmax, d, title, label, format)
-
-    def an(self, n, A):
-        return 0
-
-    def bn(self, n, A):
-        if n == 0:
-            return 0
-        return (-2 * A) / np.pi * (1 / n)
-
-
-class SignalC(Signal):
-    def __init__(self, A, f, Fo, fe, nmax, d, title, label, format):
-        super().__init__(A, f, Fo, fe, nmax, d, title, label, format)
-
-    def an(self, n, A):
-        return 0
-
-    def bn(self, n, A):
-        if n % 2 == 0:
-            return 0
-        return 4 * A / (np.pi * n)
-
-
 class SignalFourrier(Wave):
     def __init__(self, a, f, Fo, fe, d, title, label, format, nmax, an, bn):
         super().__init__(a, f, Fo, fe, d, title, label, format)
@@ -457,8 +328,8 @@ class SignalFFT(Wave):
         self.freq = np.zeros(int(self.d * self.fe))
 
     @staticmethod
-    def fft(sig: Signal):
-        sig_t, sig_s = sig.calculate()
+    def fft(sig):
+        sig_t, sig_s = sig.make_wave()
         sig_s = np.fft.fft(sig_s)
         sig_s = np.abs(sig_s)
         sig_s = sig_s / len(sig_s)
