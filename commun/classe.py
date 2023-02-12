@@ -227,10 +227,8 @@ class Convolution(Wave):
         self.h = h
 
     def make_wave(self):
-        if self.sig_t is not None and self.sig_s is not None:
-            return self.sig_t, self.sig_s
 
-        self.sig_t, self.sig_s = self.sig.calculate()
+        self.sig_t, self.sig_s = self.sig.sig_t, self.sig.sig_s
         new_sig_s = np.zeros(len(self.sig_s))
 
         for i in range(len(self.sig_t)):
@@ -292,7 +290,7 @@ class SignalFourrier(Wave):
 
         for i in range(self.nmax):
             new_signal.sig_s[i] = self.an(i, self.a)
-            new_signal.sig_t[i] = i
+            new_signal.sig_t[i] = i * self.te
 
         return new_signal
 
@@ -319,7 +317,7 @@ class SignalFourrier(Wave):
 
         for i in range(self.nmax):
             new_signal.sig_s[i] = self.bn(i, self.a)
-            new_signal.sig_t[i] = i
+            new_signal.sig_t[i] = i * self.te
 
         return new_signal
 
