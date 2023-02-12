@@ -40,8 +40,6 @@ if __name__ == "__main__":
         bn=bn,
     )
     Signal.make_wave()
-    print(Signal.sig_s)
-    print(Signal.sig_t)
 
     graph = Graph(
         [Signal, Signal.get_an(), Signal.get_bn()],
@@ -87,8 +85,8 @@ if __name__ == "__main__":
         xlabel="t",
     )
 
+    graph.plot()
 
-    # graph.plot()
 
     # signalC
 
@@ -125,7 +123,7 @@ if __name__ == "__main__":
         title="SignalC",
         xlabel="t",
     )
-    # graph.plot()
+    graph.plot()
 
     # Exercice 6
     sin1 = CosWave(
