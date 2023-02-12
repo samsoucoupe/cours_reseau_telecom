@@ -123,3 +123,77 @@ if __name__ == "__main__":
         xlabel="t",
     )
     graph.plot()
+
+    # Exercice 6
+    sin1 = CosWave(
+        a=1, f=10, fe=1000, ph=0, d=0.25, title="cos wave 1", label="Wave :", format="-bo"
+    )
+    sin2 = CosWave(
+        a=1, f=20, fe=1000, ph=0, d=0.25, title="cos wave 3", label="Wave :", format="-bo"
+    )
+    sin3 = CosWave(
+        a=1,
+        f=400,
+        fe=1000,
+        ph=0,
+        d=0.25,
+        title="cos wave 3",
+        label="Wave :",
+        format="-bo",
+    )
+
+    sum = sin1 + sin2 + sin3
+    sum.change_title("sum")
+
+    graph = Graph(
+        [sin1, sin2, sin3, sum],
+        plot_type="line",
+        subplot=True,
+        title="Exercice 6",
+        xlabel="t",
+    )
+    graph.plot()
+
+    h = [
+        -6.849167e-003,
+        1.949014e-003,
+        1.309874e-002,
+        1.100677e-002,
+        -6.661435e-003,
+        -1.321869e-002,
+        6.819504e-003,
+        2.292400e-002,
+        7.732160e-004,
+        -3.153488e-002,
+        -1.384843e-002,
+        4.054618e-002,
+        3.841148e-002,
+        -4.790497e-002,
+        -8.973017e-002,
+        5.285565e-002,
+        3.126515e-001,
+        4.454146e-001,
+        3.126515e-001,
+        5.285565e-002,
+        -8.973017e-002,
+        -4.790497e-002,
+        3.841148e-002,
+        4.054618e-002,
+        -1.384843e-002,
+        -3.153488e-002,
+        7.732160e-004,
+        2.292400e-002,
+        6.819504e-003,
+        -1.321869e-002,
+        -6.661435e-003,
+        1.100677e-002,
+        1.309874e-002,
+        1.949014e-003,
+        -6.849167e-003,
+    ]
+
+    convolution = Convolution(h=h, sig=sum)
+    convolution.make_wave()
+
+    graph = Graph([convolution], plot_type="line", subplot=False, title="Exercice 6", xlabel="t")
+    graph.plot()

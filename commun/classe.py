@@ -54,6 +54,12 @@ class Wave:
     def change_format(self, format):
         self.format = format
 
+    def change_label(self, label):
+        self.label = label
+
+    def change_title(self, title):
+        self.title = title
+
     def add_signal(self, signal):
         self.sig_s = self.sig_s + signal.sig_s
 
@@ -214,7 +220,7 @@ class CosWave(Wave):
         return a * np.cos(omega * t + ph)
 
 
-class Convultion(Wave):
+class Convolution(Wave):
     def __init__(self, sig, h):
         super().__init__(sig.a, sig.f, sig.fe, sig.ph, sig.d)
         self.sig = sig
@@ -231,12 +237,10 @@ class Convultion(Wave):
             for k in range(len(self.h)):
                 if i - k < 0:
                     break
-                print(i, k)
+
                 new_sig_s[i] += self.h[k] * self.sig_s[i - k]
 
         self.sig_s = new_sig_s
-
-        return self.sig_t, self.sig_s
 
 
 class SignalFourrier(Wave):
@@ -264,7 +268,6 @@ class SignalFourrier(Wave):
                     2 * math.pi * n * self.Fo * t
                 ) + self.bn(n, self.a) * math.sin(2 * math.pi * n * self.Fo * t)
                 n += 1
-        print(self.sig_t, self.sig_s)
 
     def get_an(self):
         new_signal = SignalFourrier(
@@ -327,19 +330,11 @@ class SignalFFT(Wave):
         self.signal = signal
         self.freq = np.zeros(int(self.d * self.fe))
 
-    @staticmethod
-    def fft(sig):
-        sig_t, sig_s = sig.make_wave()
-        sig_s = np.fft.fft(sig_s)
-        sig_s = np.abs(sig_s)
-        sig_s = sig_s / len(sig_s)
-        return sig_t, sig_s
+    def ftt(self):
+        self.signal.make_wave()
+        self.sig_s = np.fft.fft(self.signal.sig_s)
+        self.sig_t = np.fft.fftfreq(len(self.signal.sig_s), self.signal.te)
+        self.freq = self.sig_t
 
-    def make_wave(self):
-        self.sig_t, self.sig_s = self.fft(self.signal)
-        self.t = np.fft.fftshift(self.sig_t)
-        self.sig_t = self.sig_t / len(self.sig_t)
-        self.te = 1.0 / self.fe
-        self.freq = np.fft.fftfreq(len(self.sig_t), self.te)
-
-        return self.sig_t, self.sig_s
+    def get_freq(self):
+        return self.freq
