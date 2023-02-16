@@ -10,15 +10,15 @@ class Wave:
     """
 
     def __init__(
-            self,
-            a=1.0,
-            f=440.0,
-            fe=8000.0,
-            ph=0.0,
-            d=1.0,
-            title="Une wave",
-            label="Wave :",
-            format="-bo",
+        self,
+        a=1.0,
+        f=440.0,
+        fe=8000.0,
+        ph=0.0,
+        d=1.0,
+        title="Une wave",
+        label="Wave :",
+        format="-bo",
     ):
         self.sig_s = np.linspace(0, d, int(d * fe))
         self.a = a
@@ -90,6 +90,17 @@ class Wave:
         wav.writeframes(self.sig_s)
         wav.close()
 
+    def make_spectrum(self):
+        """
+        Create a spectrum of the signal
+        """
+        new_signal = Wave()
+        spectrum = np.fft.fftshift(np.fft.fft(self.sig_s))
+        new_signal.sig_s = spectrum
+        new_signal.sig_t = np.linspace(-self.fe / 2, self.fe / 2, len(spectrum))
+        new_signal.title = "Spectrum of " + self.title
+        return new_signal
+
 
 class SinWave(Wave):
     """
@@ -134,8 +145,8 @@ class TriangleWave(Wave):
 
     def wave_type(self, a, omega, t, ph):
         return a * (
-                (4 * abs((t + ph) / (1 / self.f) - np.floor(t / (1 / self.f) + 1 / 2)))
-                - 1.0
+            (4 * abs((t + ph) / (1 / self.f) - np.floor(t / (1 / self.f) + 1 / 2)))
+            - 1.0
         )
 
 
@@ -199,7 +210,7 @@ class ImpulseWave(Wave):
             width = self.di
             length = np.random.normal(self.mean, self.std)
             pos = np.random.randint(0, N)
-            sig_s[pos: pos + width] = length
+            sig_s[pos : pos + width] = length
 
         self.sig_t = t
         self.sig_s = sig_s
@@ -336,3 +347,78 @@ class SignalFFT(Wave):
 
     def get_freq(self):
         return self.freq
+
+
+class Quantificateur(Wave):
+    def __init__(self, signal, vmax, b, step=0):
+        super().__init__(
+            signal.a,
+            signal.f,
+            signal.fe,
+            signal.ph,
+            signal.d,
+            signal.title,
+            signal.label,
+            signal.format,
+        )
+        self.signal = signal
+        self.vmax = vmax
+        self.b = b
+        self.sig_s = np.zeros(len(self.signal.sig_s))
+        self.sig_t = np.zeros(len(self.signal.sig_s))
+        self.dico = {}
+        self.step = step
+        if self.step == 0:
+            self.step = 2 * self.vmax / (2**self.b)
+
+    def make_dico(self):
+        """
+        Crée un dictionnaire uniforme de quantification sur "b" bits
+        pour des signaux d'amplitude max "vmax"
+        """
+        self.dico = {}
+
+        for i in range(2**self.b):
+            self.dico[i] = i * self.step - self.vmax + self.step / 2
+
+    def quantificate(self):
+        self.make_dico()
+        for i in range(len(self.signal.sig_s)):
+            diff = [
+                abs(self.signal.sig_s[i] - self.dico[j]) for j in range(2**self.b)
+            ]
+            min_diff = min(diff)
+            index = diff.index(min_diff)
+            self.sig_s[i] = self.dico[index]
+            self.sig_t[i] = self.signal.sig_t[i]
+
+        self.change_format("ro")
+        self.change_label("Quantificateur")
+        self.change_title("Quantificateur")
+
+        difference = Wave(a=self.a, f=self.f, fe=self.fe, ph=self.ph, d=self.d)
+        difference.sig_s = abs(self.signal.sig_s - self.sig_s)
+        difference.change_format("bx")
+        difference.change_label("Difference")
+        difference.change_title("Difference")
+
+        return difference
+
+    def MSE(self):
+        return np.sum((self.signal.sig_s - self.sig_s) ** 2) / len(self.signal.sig_s)
+
+    def SNR(self):
+        return 10 * np.log10(np.sum(self.signal.sig_s**2) / self.MSE())
+
+
+# TPNOTES
+
+
+class DTMF(Wave):
+    def __init__(
+        self,
+        file,
+    ):
+        super().__init__(a=1, f=0, fe=10, ph=0, d=0, title="", label="", format="")
+        self.file = file
+        self.sig_t, self.sig_s = np.loadtxt(self.file)

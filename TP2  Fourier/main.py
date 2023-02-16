@@ -127,10 +127,24 @@ if __name__ == "__main__":
 
     # Exercice 6
     sin1 = CosWave(
-        a=1, f=10, fe=1000, ph=0, d=0.25, title="cos wave 1", label="Wave :", format="-bo"
+        a=1,
+        f=10,
+        fe=1000,
+        ph=0,
+        d=0.25,
+        title="cos wave 1",
+        label="Wave :",
+        format="-bo",
     )
     sin2 = CosWave(
-        a=1, f=20, fe=1000, ph=0, d=0.25, title="cos wave 3", label="Wave :", format="-bo"
+        a=1,
+        f=20,
+        fe=1000,
+        ph=0,
+        d=0.25,
+        title="cos wave 3",
+        label="Wave :",
+        format="-bo",
     )
     sin3 = CosWave(
         a=1,
@@ -154,6 +168,8 @@ if __name__ == "__main__":
         xlabel="t",
     )
     graph.plot()
+
+    Graph([sum], plot_type="line", subplot=False, title="Exercice 6", xlabel="t").plot()
 
     h = [
         -6.849167e-003,
@@ -195,6 +211,15 @@ if __name__ == "__main__":
 
     convolution = Convolution(h=h, sig=sum)
     convolution.make_wave()
-
-    graph = Graph([convolution], plot_type="line", subplot=False, title="Exercice 6", xlabel="t")
+    # spectre du signal convolué
+    spectre = convolution.make_spectrum()
+    graph = Graph(
+        [convolution, spectre],
+        plot_type="line",
+        subplot=True,
+        title="Exercice 6",
+        xlabel="t",
+    )
     graph.plot()
+
+    Graph([sum, sum.make_spectrum()], plot_type="line", subplot=True, title="Exercice 6", xlabel="t").plot()

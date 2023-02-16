@@ -13,7 +13,11 @@ class Graph:
     ):
         self.waves = waves
         self.plot_type = plot_type
+        if self.plot_type not in ["line", "scatter"]:
+            raise ValueError("plot_type must be 'line' or 'scatter'")
         self.subplot = subplot
+        if self.subplot and len(self.waves) < 2:
+            raise ValueError("subplot must be False if there is less than 2 waves")
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
@@ -32,7 +36,9 @@ class Graph:
             ax.grid(True)
             plt.show()
         else:
-            fig, ax = plt.subplots(len(self.waves), 1, sharex=True, sharey=True, figsize=(10, 10), dpi=100)
+            fig, ax = plt.subplots(
+                len(self.waves), 1, figsize=(10, 10), dpi=100
+            )
             for i, wave in enumerate(self.waves):
                 ax[i].set_title(wave.title)
                 ax[i].set_xlabel(self.xlabel)
