@@ -85,9 +85,9 @@ class Wave:
         """
         Convert the signal to a wav file
         """
-        wav = wv.open("test.wav", "w")
+        wav = wv.open(self.title + ".wav", "w")
         wav.setparams((1, 2, self.fe, 0, "NONE", "not compressed"))
-        wav.writeframes(self.sig_s)
+        wav.writeframes(np.int16(self.sig_s))
         wav.close()
 
     def make_spectrum(self):
@@ -422,3 +422,90 @@ class DTMF(Wave):
         super().__init__(a=1, f=0, fe=10, ph=0, d=0, title="", label="", format="")
         self.file = file
         self.sig_t, self.sig_s = np.loadtxt(self.file)
+
+
+class DTMF09(Wave):
+    def __init__(self):
+        super().__init__(a=1, f=0, fe=10, ph=0, d=0, title="", label="", format="")
+
+        self.fe = 4000
+        self.valeur = {
+            "0": [941, 1336],
+            "1": [697, 1209],
+            "2": [697, 1336],
+            "3": [697, 1477],
+            "4": [770, 1209],
+            "5": [770, 1336],
+            "6": [770, 1477],
+            "7": [852, 1209],
+            "8": [852, 1336],
+            "9": [852, 1477],
+        }
+
+    def generate_signal(self):
+        # make a signal using self.valeur to make a signal with the number 0123456789 sur des echantillon de 40 ms puisun blanc de40 ms
+
+        self.sig_s = np.zeros(4000)
+        self.sig_t = np.linspace(0, 1, self.fe)
+
+        for i in range(10):
+            # f1= frequence horizontale
+            # f2= frequence verticale
+            freq1 = self.valeur[str(i)][0]
+            freq2 = self.valeur[str(i)][1]
+            t = np.linspace(0, 0.04, int(0.04 * self.fe), endpoint=False)
+
+            signal1 = np.sin(2 * np.pi * freq1 * t)
+            signal2 = np.sin(2 * np.pi * freq2 * t)
+
+            # Concatenate signals and add silence for 0.04 seconds
+            signal = np.concatenate((signal1, signal2, np.zeros(int(0.04 * self.fe))))
+
+            # Add signal to output array
+            start_idx = int(i * 0.08 * self.fe)
+            end_idx = start_idx + len(signal)
+            self.sig_s[start_idx:end_idx] = signal
+
+        # Print signal for debugging
+        print(self.sig_s)
+
+    def generate_with_space(self):
+        self.sig_s = np.zeros(4000)
+        self.sig_t = np.linspace(0, 1, self.fe)
+        # genere on fait un signal avec 0 1 2 3 4 5 6 7 8 9 et on fait un espace entre chaque de 40 ms
+        # on fait un signal de 4000 echantillons
+        # avec chaque echantillon de 40 ms
+        for i in range(20):
+            if i % 2 == 0:
+                # f1= frequence horizontale
+                # f2= frequence verticale
+                freq1 = self.valeur[str(i // 2)][0]
+                freq2 = self.valeur[str(i // 2)][1]
+
+                t = np.linspace(0, 0.04, int(0.04 * self.fe), endpoint=False)
+
+                signal1 = np.sin(2 * np.pi * freq1 * t)
+                signal2 = np.sin(2 * np.pi * freq2 * t)
+                # Concatenate signals and add silence for 0.04 seconds
+                signal = np.concatenate(
+                    (signal1, signal2, np.zeros(int(0.04 * self.fe)))
+                )
+
+                # Add signal to output array
+                start_idx = int(i * 0.04 * self.fe)
+                end_idx = start_idx + len(signal)
+                self.sig_s[start_idx:end_idx] = signal
+
+            else:
+                signal = np.zeros(int(0.04 * self.fe))
+                start_idx = int(i * 0.04 * self.fe)
+                end_idx = start_idx + len(signal)
+                self.sig_s[start_idx:end_idx] = signal
+
+    def convert_to_wav(self):
+        wav = wv.open(f"{self.title}.wav", "w")
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(4000)
+        wav.writeframes(self.sig_s)
+        wav.close()
