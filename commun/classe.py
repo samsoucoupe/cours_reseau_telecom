@@ -1,4 +1,5 @@
 import math
+import struct
 import wave as wv
 
 import numpy as np
@@ -503,9 +504,26 @@ class DTMF09(Wave):
                 self.sig_s[start_idx:end_idx] = signal
 
     def convert_to_wav(self):
-        wav = wv.open(f"{self.title}.wav", "w")
-        wav.setnchannels(1)
-        wav.setsampwidth(2)
-        wav.setframerate(4000)
-        wav.writeframes(self.sig_s)
-        wav.close()
+        nbCanal = 1
+        nbOctet = 1
+        fe = 4000
+        duree = 1
+        nbEchantillon = fe * duree
+        wave = wv.open(f"{self.title}.wav", "w")
+        wave.setparams((nbCanal, nbOctet, fe, nbEchantillon, "NONE", "not compressed"))
+        for i in range(len(self.sig_s)):
+            val = int(self.sig_s[i])
+            if val > 1:
+                val = 1
+            if val < 1:
+                val = -1
+            val = int(val * 127.5 + 127.5)
+            try:
+                fr = struct.pack("B", val)
+                # print(fr)
+                # print("Sample {} = {}/{}".format(i,y[i],val))
+            except struct.error as err:
+                print(err)
+
+            wave.writeframes(fr)
+        wave.close()
